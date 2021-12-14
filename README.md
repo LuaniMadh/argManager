@@ -1,2 +1,2 @@
 # argManager
- Managers arguments from the main function
+ Manages arguments from the main function
