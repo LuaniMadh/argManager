@@ -1,3 +1,4 @@
+package argmanager;
 import java.util.ArrayList;
 
 public class argManager {
@@ -31,7 +32,8 @@ public class argManager {
         StrArgs = behav;        
         for (String s : behav) {
             try {
-                String n = s.substring(0, s.indexOf(":"));
+                int to = s.indexOf(":");
+                String n = s.substring(0, (to == -1)?s.length():to);
                 if(NameIsForBidden(n)){
                     throw new IllegalArgumentException("The name " + n + " is forbidden");
                 }
@@ -57,7 +59,7 @@ public class argManager {
                 }
                 b = s.indexOf("detailHelp");
                 if (b != -1) {
-                    String d = s.substring(b + 8 /* detailHelp= --> 11 letters */, s.indexOf(">", b));
+                    String d = s.substring(b + 11 /* detailHelp= --> 11 letters */, s.indexOf(">", b));
                     detailHelp = d;
                 }
 
@@ -71,22 +73,22 @@ public class argManager {
                         continue;
                     } else if (className.equalsIgnoreCase("int") || className.equalsIgnoreCase("integer")) {
                         arg<Integer> newArg = new arg<Integer>(Integer.class, n, helpText, detailHelp, hideHelp,
-                                Integer.parseInt(defaultVal));
+                                Integer.parseInt((defaultVal.isEmpty())?"0":defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("double")) {
                         arg<Double> newArg = new arg<Double>(double.class, n, helpText, detailHelp, hideHelp,
-                                Double.parseDouble(defaultVal));
+                                Double.parseDouble((defaultVal.isEmpty())?"0":defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("float") || className.equalsIgnoreCase("f")) {
                         arg<Float> newArg = new arg<Float>(float.class, n, helpText, detailHelp, hideHelp,
-                                Float.parseFloat(defaultVal));
+                                Float.parseFloat((defaultVal.isEmpty())?"0.0f":defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("long")) {
                         arg<Long> newArg = new arg<Long>(long.class, n, helpText, detailHelp, hideHelp,
-                                Long.parseLong(defaultVal));
+                                Long.parseLong((defaultVal.isEmpty())?"0":defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("char") || className.equalsIgnoreCase("character")) {

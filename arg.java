@@ -1,3 +1,4 @@
+package argmanager;
 import javax.swing.text.DefaultTextUI;
 
 public class arg<t> {
