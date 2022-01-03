@@ -12,6 +12,7 @@ package argmanager;
  *      return className.cast(result);
  * }
  */
+@SuppressWarnings("rawtypes")
 public abstract class argType<t> {
 
     protected Class<t> className;

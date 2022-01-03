@@ -1,9 +1,9 @@
 package argmanager;
 import java.util.ArrayList;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class argManager {
 
-    private static String[] StrArgs;
     private static ArrayList<arg> args = new ArrayList<arg>();
     private static ArrayList<argType> argTypes = new ArrayList<argType>();
     private static String helpInto = "";
@@ -29,7 +29,6 @@ public class argManager {
      * @param behav
      */
     public static void setBehaviour(String... behav) {
-        StrArgs = behav;        
         for (String s : behav) {
             try {
                 int to = s.indexOf(":");
@@ -66,7 +65,11 @@ public class argManager {
                 b = s.indexOf("type");
                 if (b != -1) {
                     className = s.substring(b + 5 /* type= --> 5 letters */ , s.indexOf(">", b));
-                    if (className.equalsIgnoreCase("boolean") || className.equalsIgnoreCase("bool")) {
+                    if (className.equalsIgnoreCase("String") || className.equalsIgnoreCase("str")) {
+                        arg<String> newArg = new arg<String>(String.class, n, helpText, detailHelp, hideHelp, defaultVal);
+                        args.add(newArg);
+                        continue;
+                    }else if (className.equalsIgnoreCase("boolean") || className.equalsIgnoreCase("bool")) {
                         arg<Boolean> newArg = new arg<Boolean>(boolean.class, n, helpText, detailHelp, hideHelp,
                                 defaultVal.equalsIgnoreCase("true"));
                         args.add(newArg);
@@ -112,6 +115,7 @@ public class argManager {
             } catch (Exception e) {
                 System.err.println("Syntax error or sth");
                 e.printStackTrace();
+                
             }
         }
     }
@@ -143,16 +147,20 @@ public class argManager {
     public static <t> t getArg(Class<t> type, String name) throws ArgNotFoundException {
         for (arg a : args) {
             if (a.getName().equals(name)) {
-                if (a.getType().getTypeName().equals(type.getTypeName())) {
+                if (StripClassName(a.getType().getTypeName()).equalsIgnoreCase(StripClassName(type.getTypeName()))) {
                     // System.out.println(((arg<t>) a).toString());
                     return ((arg<t>) a).getValue();
                 } else {
-                    throw new ArgNotFoundException("Arg " + name + " found, but it is from class " + a.getType()
+                    throw new ArgNotFoundException("Arg " + name + " found, but it is from class " + a.getType().getTypeName()
                             + ", and not " + type.getTypeName() + ".");
                 }
             }
         }
         throw new ArgNotFoundException("Arg with " + name + " not found");
+    }
+
+    protected static String StripClassName(String n){
+        return n.substring(n.lastIndexOf(".")+1, n.length());
     }
 
     /**
@@ -167,6 +175,15 @@ public class argManager {
         return getArg(String.class, name);
     }
 
+    public static boolean isSet(String name) throws ArgNotFoundException {
+        for (arg a : args) {
+            if (a.getName().equals(name)) {
+                    return a.isSet();                
+            }
+        }
+        throw new ArgNotFoundException("Arg with " + name + " not found");
+    }
+ 
     /**
      * Tages in the String[] args from the main function and extracts all
      * information needed for the previously with setBehaviour prepared arguments.
@@ -179,27 +196,26 @@ public class argManager {
         }
         checkForHelp(rawArgs);
         for (int i = 0; i < rawArgs.length; i++) {
-            if (rawArgs[i].startsWith("-")) {
+            if (rawArgs[i].startsWith("--")) {
                 int argEnd = i + 1;
-                for (int k = i + 1; k < rawArgs.length; k++) {
+                for (int k = i + 1; k <= rawArgs.length; k++) {
                     argEnd = k;
-                    if (rawArgs[k].startsWith("-")) {
-                        k -= 1;
+                    if (k == rawArgs.length || rawArgs[k].startsWith("--")) {
                         break;
                     }
                 }
                 String stringRep = "";
-                for (int k = i + 1; k <= argEnd && k < rawArgs.length; k++) {
+                for (int k = i + 1; k < argEnd && k < rawArgs.length; k++) {
                     stringRep += " " + rawArgs[k];
                 }
                 stringRep = stringRep.strip();
 
-                if (stringRep.startsWith("-")) {
+                if (stringRep.startsWith("--")) {
                     stringRep = "";
                 }
 
                 String argName = rawArgs[i];
-                argName = argName.replaceAll("-", "");
+                argName = argName.replaceAll("--", "");
 
                 arg argument = null;
                 for (arg a : args) {
@@ -219,15 +235,15 @@ public class argManager {
                 } else if (className.equalsIgnoreCase("boolean") || className.equalsIgnoreCase("bool")) {
                     argument.setValue((stringRep.isEmpty()) ? true : (stringRep.equalsIgnoreCase("true")));
                 } else if (className.equalsIgnoreCase("int") || className.equalsIgnoreCase("integer")) {
-                    argument.setValue(Integer.parseInt(stringRep));
+                    argument.setValue((stringRep.isEmpty()) ? 0 : Integer.parseInt(stringRep));
                 } else if (className.equalsIgnoreCase("double")) {
-                    argument.setValue(Double.parseDouble(stringRep));
+                    argument.setValue((stringRep.isEmpty()) ? 0 : Double.parseDouble(stringRep));
                 } else if (className.equalsIgnoreCase("float") || className.equalsIgnoreCase("f")) {
-                    argument.setValue(Float.parseFloat(stringRep));
+                    argument.setValue((stringRep.isEmpty()) ? 0.0f : Float.parseFloat(stringRep));
                 } else if (className.equalsIgnoreCase("long")) {
-                    argument.setValue(Long.parseLong(stringRep));
+                    argument.setValue((stringRep.isEmpty()) ? 0 : Long.parseLong(stringRep));
                 } else if (className.equalsIgnoreCase("char") || className.equalsIgnoreCase("character")) {
-                    argument.setValue(stringRep.strip().charAt(0));
+                    argument.setValue((stringRep.isEmpty()) ? "" : stringRep.strip().charAt(0));
                 } else {
                     for (argType at : argTypes) {
                         if (at.getArgClass().toString().equalsIgnoreCase(className)) {

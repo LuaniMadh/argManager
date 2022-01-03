@@ -1,5 +1,4 @@
 package argmanager;
-import javax.swing.text.DefaultTextUI;
 
 public class arg<t> {
 
@@ -13,6 +12,11 @@ public class arg<t> {
 
     public void setValue(t nValue) {
         value = nValue;
+        isSet = true;
+    }
+
+    public boolean isSet(){
+        return isSet;
     }
 
     public String getHelp() {
@@ -33,6 +37,7 @@ public class arg<t> {
     private t defaultValue;
     private boolean hideInHelp;
     private String detailHelp;
+    private boolean isSet = false;
 
     public arg(Class<t> type, String name, t value, t defaultValue, String help, String detailHelp,
             boolean hideInHelp) {
@@ -55,6 +60,7 @@ public class arg<t> {
     }
 
     @Override
+    @SuppressWarnings({"rawtypes" ,"unchecked"})
     public boolean equals(Object obj) {
         if (obj.getClass() == this.getClass()) {
             if (((arg) obj).getType().equals(type)) {
