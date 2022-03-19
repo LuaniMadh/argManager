@@ -1,7 +1,8 @@
 package argmanager;
+
 import java.util.ArrayList;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class argManager {
 
     private static ArrayList<arg> args = new ArrayList<arg>();
@@ -32,8 +33,8 @@ public class argManager {
         for (String s : behav) {
             try {
                 int to = s.indexOf(":");
-                String n = s.substring(0, (to == -1)?s.length():to);
-                if(NameIsForBidden(n)){
+                String n = s.substring(0, (to == -1) ? s.length() : to);
+                if (NameIsForBidden(n)) {
                     throw new IllegalArgumentException("The name " + n + " is forbidden");
                 }
                 String className = "";
@@ -66,32 +67,33 @@ public class argManager {
                 if (b != -1) {
                     className = s.substring(b + 5 /* type= --> 5 letters */ , s.indexOf(">", b));
                     if (className.equalsIgnoreCase("String") || className.equalsIgnoreCase("str")) {
-                        arg<String> newArg = new arg<String>(String.class, n, helpText, detailHelp, hideHelp, defaultVal);
+                        arg<String> newArg = new arg<String>(String.class, n, helpText, detailHelp, hideHelp,
+                                defaultVal);
                         args.add(newArg);
                         continue;
-                    }else if (className.equalsIgnoreCase("boolean") || className.equalsIgnoreCase("bool")) {
+                    } else if (className.equalsIgnoreCase("boolean") || className.equalsIgnoreCase("bool")) {
                         arg<Boolean> newArg = new arg<Boolean>(boolean.class, n, helpText, detailHelp, hideHelp,
                                 defaultVal.equalsIgnoreCase("true"));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("int") || className.equalsIgnoreCase("integer")) {
                         arg<Integer> newArg = new arg<Integer>(Integer.class, n, helpText, detailHelp, hideHelp,
-                                Integer.parseInt((defaultVal.isEmpty())?"0":defaultVal));
+                                Integer.parseInt((defaultVal.isEmpty()) ? "0" : defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("double")) {
                         arg<Double> newArg = new arg<Double>(double.class, n, helpText, detailHelp, hideHelp,
-                                Double.parseDouble((defaultVal.isEmpty())?"0":defaultVal));
+                                Double.parseDouble((defaultVal.isEmpty()) ? "0" : defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("float") || className.equalsIgnoreCase("f")) {
                         arg<Float> newArg = new arg<Float>(float.class, n, helpText, detailHelp, hideHelp,
-                                Float.parseFloat((defaultVal.isEmpty())?"0.0f":defaultVal));
+                                Float.parseFloat((defaultVal.isEmpty()) ? "0.0f" : defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("long")) {
                         arg<Long> newArg = new arg<Long>(long.class, n, helpText, detailHelp, hideHelp,
-                                Long.parseLong((defaultVal.isEmpty())?"0":defaultVal));
+                                Long.parseLong((defaultVal.isEmpty()) ? "0" : defaultVal));
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("char") || className.equalsIgnoreCase("character")) {
@@ -115,20 +117,21 @@ public class argManager {
             } catch (Exception e) {
                 System.err.println("Syntax error or sth");
                 e.printStackTrace();
-                
+
             }
         }
     }
 
     /**
      * Checks if the name is allowed for an argument.
+     * 
      * @param n
      * @return
      */
-    protected static boolean NameIsForBidden(String n){
-        String[] forbiddenNames = {"help"};
-        for(String s : forbiddenNames){
-            if(n.equalsIgnoreCase(s)){
+    protected static boolean NameIsForBidden(String n) {
+        String[] forbiddenNames = { "help" };
+        for (String s : forbiddenNames) {
+            if (n.equalsIgnoreCase(s)) {
                 return true;
             }
         }
@@ -142,25 +145,31 @@ public class argManager {
      * @param type
      * @param name
      * @return
-     * @throws ArgNotFoundException
      */
-    public static <t> t getArg(Class<t> type, String name) throws ArgNotFoundException {
+    public static <t> t getArg(Class<t> type, String name) {
         for (arg a : args) {
             if (a.getName().equals(name)) {
                 if (StripClassName(a.getType().getTypeName()).equalsIgnoreCase(StripClassName(type.getTypeName()))) {
                     // System.out.println(((arg<t>) a).toString());
                     return ((arg<t>) a).getValue();
                 } else {
-                    throw new ArgNotFoundException("Arg " + name + " found, but it is from class " + a.getType().getTypeName()
-                            + ", and not " + type.getTypeName() + ".");
+                    ArgNotFoundException e = new ArgNotFoundException(
+                            "Arg " + name + " found, but it is from class " + a.getType().getTypeName()
+                                    + ", and not " + type.getTypeName() + ".");
+                    e.printStackTrace();
+                    System.exit(0);
+                    return null;
                 }
             }
         }
-        throw new ArgNotFoundException("Arg with " + name + " not found");
+        ArgNotFoundException e = new ArgNotFoundException("Arg with " + name + " not found");
+        e.printStackTrace();
+        System.exit(0);
+        return null;
     }
 
-    protected static String StripClassName(String n){
-        return n.substring(n.lastIndexOf(".")+1, n.length());
+    protected static String StripClassName(String n) {
+        return n.substring(n.lastIndexOf(".") + 1, n.length());
     }
 
     /**
@@ -171,19 +180,22 @@ public class argManager {
      * @return
      * @throws ArgNotFoundException
      */
-    public static String getArg(String name) throws ArgNotFoundException {
+    public static String getArg(String name) {
         return getArg(String.class, name);
     }
 
-    public static boolean isSet(String name) throws ArgNotFoundException {
+    public static boolean isSet(String name) {
         for (arg a : args) {
             if (a.getName().equals(name)) {
-                    return a.isSet();                
+                return a.isSet();
             }
         }
-        throw new ArgNotFoundException("Arg with " + name + " not found");
+        ArgNotFoundException e = new ArgNotFoundException("Arg with " + name + " not found");
+        e.printStackTrace();
+        System.exit(0);
+        return false;
     }
- 
+
     /**
      * Tages in the String[] args from the main function and extracts all
      * information needed for the previously with setBehaviour prepared arguments.
@@ -257,7 +269,8 @@ public class argManager {
     }
 
     /**
-     * There is always 
+     * There is always
+     * 
      * @param rawArgs
      */
     protected static void checkForHelp(String[] rawArgs) {
