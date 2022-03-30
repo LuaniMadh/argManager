@@ -77,9 +77,19 @@ public class argManager {
                         args.add(newArg);
                         continue;
                     } else if (className.equalsIgnoreCase("int") || className.equalsIgnoreCase("integer")) {
-                        arg<Integer> newArg = new arg<Integer>(Integer.class, n, helpText, detailHelp, hideHelp,
-                                Integer.parseInt((defaultVal.isEmpty()) ? "0" : defaultVal));
-                        args.add(newArg);
+                        try {
+                            arg<Integer> newArg = new arg<Integer>(Integer.class, n, helpText, detailHelp, hideHelp,
+                                    Integer.parseInt((defaultVal.isEmpty()) ? "0" : defaultVal));
+                            args.add(newArg);
+                        } catch (NumberFormatException e) {
+                            try {
+                                arg<Integer> newArg = new arg<Integer>(Integer.class, n, helpText, detailHelp, hideHelp,
+                                        Integer.parseInt((defaultVal.isEmpty()) ? "0" : defaultVal, 16));
+                                args.add(newArg);
+                            } catch (NumberFormatException f) {
+                                throw e;
+                            }
+                        }
                         continue;
                     } else if (className.equalsIgnoreCase("double")) {
                         arg<Double> newArg = new arg<Double>(double.class, n, helpText, detailHelp, hideHelp,
@@ -246,14 +256,14 @@ public class argManager {
                     argument.setValue(stringRep);
                 } else if (className.equalsIgnoreCase("boolean") || className.equalsIgnoreCase("bool")) {
                     argument.setValue((stringRep.isEmpty()) ? true : (stringRep.equalsIgnoreCase("true")));
-                } else if (className.equalsIgnoreCase("int") || className.equalsIgnoreCase("integer")) {
-                    argument.setValue((stringRep.isEmpty()) ? 0 : Integer.parseInt(stringRep));
+                } else if (className.equalsIgnoreCase("int") || className.equalsIgnoreCase("integer")) {                    
+                    argument.setValue((stringRep.isEmpty()) ? 0 : Integer.parseInt((stringRep.startsWith("0x"))?stringRep.substring(2):stringRep, (stringRep.startsWith("0x"))?16:10));                    
                 } else if (className.equalsIgnoreCase("double")) {
                     argument.setValue((stringRep.isEmpty()) ? 0 : Double.parseDouble(stringRep));
                 } else if (className.equalsIgnoreCase("float") || className.equalsIgnoreCase("f")) {
                     argument.setValue((stringRep.isEmpty()) ? 0.0f : Float.parseFloat(stringRep));
                 } else if (className.equalsIgnoreCase("long")) {
-                    argument.setValue((stringRep.isEmpty()) ? 0 : Long.parseLong(stringRep));
+                    argument.setValue((stringRep.isEmpty()) ? 0 : Long.parseLong((stringRep.startsWith("0x"))?stringRep.substring(2):stringRep, (stringRep.startsWith("0x"))?16:10));
                 } else if (className.equalsIgnoreCase("char") || className.equalsIgnoreCase("character")) {
                     argument.setValue((stringRep.isEmpty()) ? "" : stringRep.strip().charAt(0));
                 } else {
