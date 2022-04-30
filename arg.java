@@ -1,4 +1,4 @@
-package argmanager;
+package util.argmanager;
 
 public class arg<t> {
 

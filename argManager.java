@@ -1,4 +1,4 @@
-package argmanager;
+package util.argmanager;
 
 import java.util.ArrayList;
 
@@ -31,7 +31,6 @@ public class argManager {
      */
     public static void setBehaviour(String... behav) {
         for (String s : behav) {
-            try {
                 int to = s.indexOf(":");
                 String n = s.substring(0, (to == -1) ? s.length() : to);
                 if (NameIsForBidden(n)) {
@@ -124,11 +123,6 @@ public class argManager {
                     // System.out.println("Unknown or unset type: " + n);
                     args.add(new arg<String>(String.class, n, helpText, detailHelp, hideHelp, defaultVal));
                 }
-            } catch (Exception e) {
-                System.err.println("Syntax error or sth");
-                e.printStackTrace();
-
-            }
         }
     }
 
@@ -163,19 +157,13 @@ public class argManager {
                     // System.out.println(((arg<t>) a).toString());
                     return ((arg<t>) a).getValue();
                 } else {
-                    ArgNotFoundException e = new ArgNotFoundException(
+                    throw new ArgNotFoundException(
                             "Arg " + name + " found, but it is from class " + a.getType().getTypeName()
-                                    + ", and not " + type.getTypeName() + ".");
-                    e.printStackTrace();
-                    System.exit(0);
-                    return null;
+                                    + ", and not " + type.getTypeName() + ".");                                    
                 }
             }
         }
-        ArgNotFoundException e = new ArgNotFoundException("Arg with " + name + " not found");
-        e.printStackTrace();
-        System.exit(0);
-        return null;
+        throw new ArgNotFoundException("Arg with " + name + " not found");        
     }
 
     protected static String StripClassName(String n) {
@@ -188,7 +176,6 @@ public class argManager {
      * 
      * @param name
      * @return
-     * @throws ArgNotFoundException
      */
     public static String getArg(String name) {
         return getArg(String.class, name);
@@ -200,10 +187,7 @@ public class argManager {
                 return a.isSet();
             }
         }
-        ArgNotFoundException e = new ArgNotFoundException("Arg with " + name + " not found");
-        e.printStackTrace();
-        System.exit(0);
-        return false;
+        throw new ArgNotFoundException("Arg with " + name + " not found");
     }
 
     /**

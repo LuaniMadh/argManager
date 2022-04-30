@@ -1,4 +1,4 @@
-package argmanager;
+package util.argmanager;
 /**
  * The argmanager only accepts primitives
  * So, if want you can add your own classes here to get them directly from the
